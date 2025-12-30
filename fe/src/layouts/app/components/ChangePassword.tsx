@@ -1,7 +1,7 @@
 import { Button, Form, Input, Modal, notification } from 'antd';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { changePasswordCheckOldPwd } from '../../../api/authenticationApi';
+//import { changePasswordCheckOldPwd } from '../../../api/authenticationApi';
 
 interface ChangePasswordProps {
   open: boolean;
@@ -12,31 +12,31 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ open, onClose }) => {
   const { t } = useTranslation();
   const [form] = Form.useForm();
 
-  const handleChangePassword = async () => {
-    try {
-      const values = await form.validateFields();
-      const res = await changePasswordCheckOldPwd(
-        values.oldPassword,
-        values.newPassword
-      );
-      if (res.status === 200) {
-        onClose();
-        notification.success({
-          message: t('common.actionSuccess'),
-          description: t('app.ChangePasswordSuccess'),
-        });
-        form.resetFields();
-      } else {
-        console.log('Failed to change password:', res.message);
-        notification.error({
-          message: t('common.actionFailed'),
-          description: t(res?.message),
-        });
-      }
-    } catch (errorInfo) {
-      console.log('Failed to change password:', errorInfo);
-    }
-  };
+  // const handleChangePassword = async () => {
+  //   try {
+  //     const values = await form.validateFields();
+  //     const res = await changePasswordCheckOldPwd(
+  //       values.oldPassword,
+  //       values.newPassword
+  //     );
+  //     if (res.status === 200) {
+  //       onClose();
+  //       notification.success({
+  //         message: t('common.actionSuccess'),
+  //         description: t('app.ChangePasswordSuccess'),
+  //       });
+  //       form.resetFields();
+  //     } else {
+  //       console.log('Failed to change password:', res.message);
+  //       notification.error({
+  //         message: t('common.actionFailed'),
+  //         description: t(res?.message),
+  //       });
+  //     }
+  //   } catch (errorInfo) {
+  //     console.log('Failed to change password:', errorInfo);
+  //   }
+  // };
   return (
     <Modal
       centered
@@ -51,7 +51,7 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ open, onClose }) => {
         <Button key="cancel" onClick={onClose}>
           {t('common.Close')}
         </Button>,
-        <Button key="save" type="primary" onClick={handleChangePassword}>
+        <Button key="save" type="primary">
           {t('common.Save')}
         </Button>,
       ]}

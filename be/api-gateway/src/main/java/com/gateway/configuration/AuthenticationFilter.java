@@ -38,10 +38,8 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
 
     @NonFinal
     private String[] publicEndpoints = {
-            "/identity/auth/.*",
-            "/identity/users/registration",
-            "/notification/email/send",
-            "/file/media/download/.*"
+            "/cms/auth/login",
+            "/cms/users/registration"
     };
 
     @Value("${app.api-prefix}")
@@ -60,15 +58,9 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
         if (CollectionUtils.isEmpty(authHeader))
             return unauthenticated(exchange.getResponse());
 
-        String token = authHeader.getFirst().replace("Bearer ", "");
-        log.info("Token: {}", token);
-
-        return identityService.introspect(token).flatMap(introspectResponse -> {
-            if (introspectResponse.getResult().isValid())
-                return chain.filter(exchange);
-            else
-                return unauthenticated(exchange.getResponse());
-        }).onErrorResume(throwable -> unauthenticated(exchange.getResponse()));
+        if(authHeader.getFirst()==null)
+            return unauthenticated(exchange.getResponse());
+        return chain.filter(exchange);
     }
 
     @Override

@@ -1,11 +1,15 @@
 package com.cms.entity;
 
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import jakarta.persistence.*;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 @Getter
 @Setter
@@ -15,7 +19,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
 @Table(name = "users")
-public class User extends BaseEntity {
+public class User extends BaseEntity implements UserDetails {
     @Column(name = "user_name", nullable = false, length = 100)
     private String username;
 
@@ -54,4 +58,29 @@ public class User extends BaseEntity {
 
     @Column(name = "birthday")
     private Date birthday;
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of();
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return false;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return false;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return false;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return false;
+    }
 }

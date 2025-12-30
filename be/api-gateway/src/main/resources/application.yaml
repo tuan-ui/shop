@@ -10,9 +10,9 @@ spring:
   cloud:
     gateway:
       routes:
-        - id: identity_service
+        - id: cms_service
           uri: http://localhost:8080
           predicates:
-          - Path=${app.api-prefix}/identity/**
+          - Path=${app.api-prefix}/cms/**
           filters:
           - StripPrefix=2

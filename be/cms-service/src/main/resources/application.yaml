@@ -17,7 +17,3 @@ spring:
     show-sql: false
 jwt:
   secretKey: e0399e8ff47111a4d0ccca8d5d114f7c2a6657d591854db8b214bbd6c85b8c51
-
-app:
-  services:
-    profile: http://localhost:8081/profile

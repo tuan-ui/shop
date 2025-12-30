@@ -3,7 +3,9 @@ package com.cms.service;
 import com.cms.entity.RefreshToken;
 import com.cms.repository.RefreshTokenRepository;
 import com.cms.repository.UserRepository;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -12,6 +14,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class RefreshTokenService {
 	RefreshTokenRepository refreshTokenRepository;
 	UserRepository userRepository;

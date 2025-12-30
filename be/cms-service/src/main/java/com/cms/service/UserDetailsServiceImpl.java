@@ -21,7 +21,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 		if (user.getIsActive() == null || !user.getIsActive()) {
 			throw new UsernameNotFoundException("User is locked");
 		}
-		return (UserDetails) user;
+		return user;
 		
 		
 	}

@@ -15,7 +15,7 @@ import org.springframework.stereotype.Repository;
 import com.cms.entity.User;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, String> {
+public interface UserRepository extends JpaRepository<User, UUID> {
     @Query("FROM User u WHERE u.id = :id AND u.isDeleted = false")
     User getUserByUserId(UUID id);
 
@@ -23,25 +23,25 @@ public interface UserRepository extends JpaRepository<User, String> {
     Optional<User> findByUsername(String username);
 
 
-    @Query("""
-    SELECT DISTINCT u
-    FROM User u
-    WHERE u.isDeleted = false
+    @Query(value = """
+    SELECT DISTINCT u.*
+    FROM users u
+    WHERE u.is_deleted = false
       AND (
         :searchString IS NULL OR :searchString = ''
-        OR LOWER(u.username) LIKE LOWER(CONCAT('%', :searchString, '%'))
-        OR CAST(FUNCTION('unaccent', u.fullName) AS string) ILIKE CONCAT('%', :searchString, '%')
-        OR CAST(FUNCTION('unaccent', u.email) AS string) ILIKE CONCAT('%', :searchString, '%')
+        OR LOWER(u.user_name) LIKE LOWER(CONCAT('%', :searchString, '%'))
+        OR u.full_name LIKE CONCAT('%', :searchString, '%')
+        OR u.email LIKE CONCAT('%', :searchString, '%')
         OR LOWER(u.phone) LIKE LOWER(CONCAT('%', :searchString, '%'))
-        OR LOWER(CAST(u.userCode AS string)) LIKE LOWER(CONCAT('%', :searchString, '%'))
+        OR LOWER(CAST(u.user_code AS CHAR)) LIKE LOWER(CONCAT('%', :searchString, '%'))
       )
       AND (
         :userName IS NULL OR :userName = ''
-        OR LOWER(u.username) LIKE LOWER(CONCAT('%', :userName, '%'))
+        OR LOWER(u.user_name) LIKE LOWER(CONCAT('%', :userName, '%'))
       )
       AND (
         :fullName IS NULL OR :fullName = ''
-        OR CAST(FUNCTION('unaccent', u.fullName) AS string) ILIKE CONCAT('%', :fullName, '%')
+        OR u.full_name LIKE CONCAT('%', :fullName, '%')
       )
       AND (
         :phone IS NULL OR :phone = ''
@@ -49,14 +49,14 @@ public interface UserRepository extends JpaRepository<User, String> {
       )
       AND (
         :birthStr IS NULL OR :birthStr = ''
-        OR CAST(u.birthday AS date) = FUNCTION('to_date', :birthStr, 'DD/MM/YYYY')
+        OR u.birthday = STR_TO_DATE(:birthStr, '%d/%m/%Y')
       )
       AND (
         :userCode IS NULL OR :userCode = ''
-        OR LOWER(CAST(u.userCode AS string)) LIKE LOWER(CONCAT('%', :userCode, '%'))
+        OR LOWER(CAST(u.user_code AS CHAR)) LIKE LOWER(CONCAT('%', :userCode, '%'))
       )
-    ORDER BY u.createAt DESC
-    """)
+    ORDER BY u.create_at DESC
+    """, nativeQuery = true)
     Page<User> listUsersNative(
             @Param("searchString") String searchString,
             @Param("userName") String userName,
@@ -64,8 +64,8 @@ public interface UserRepository extends JpaRepository<User, String> {
             @Param("phone") String phone,
             @Param("birthStr") String birthStr,
             @Param("userCode") String userCode,
-            Pageable pageable
-    );
+            Pageable pageable);
+
 
     @Query("UPDATE User u SET u.password = :password WHERE u.id = :userId")
     @Modifying
