@@ -3,6 +3,7 @@ package com.cms.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 
+import jakarta.persistence.Table;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -13,6 +14,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
+@Table(name = "roles")
 public class Role extends BaseEntity {
 
     @Column(name = "role_name", nullable = false, length = 255)
