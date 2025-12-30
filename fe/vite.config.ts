@@ -1,0 +1,18 @@
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react-swc';
+export default defineConfig({
+  plugins: [react()],
+  build: {
+    commonjsOptions: {
+      include: [/node_modules/, /@alilc/],
+    },
+  },
+  resolve: {
+    alias: {
+    },
+  },
+  server: {
+    host: 'localhost',
+    port: 5173,
+  },
+});
