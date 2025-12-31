@@ -39,30 +39,39 @@ public interface RolePermissionsRepository extends JpaRepository<PermissionRole,
                     + "WHERE pr.id.roleId = :roleId AND p.isDeleted = false  And pr.id.isHalf = true")
     List<Permission> findPermissionsHalfByRoleId(@Param("roleId") UUID roleId);
 
-    @Query(
-            """
-	SELECT p
-	FROM PermissionRole pr
-	JOIN Permission p ON pr.id.permissionId = p.id
-	JOIN UserRoles ru ON ru.id.roleId = pr.id.roleId
-	WHERE ru.id.userId = :userId
-	AND p.isDeleted = false
-	AND p.isMenus = true
-	AND (
-		p.permissionParent IS NULL
-		OR p.permissionParent IN (
-		SELECT p2.id
-		FROM PermissionRole pr2
-		JOIN Permission p2 ON pr2.id.permissionId = p2.id
-		JOIN UserRoles ru2 ON ru2.id.roleId = pr2.id.roleId
-		WHERE ru2.id.userId = :userId
-			AND p2.isDeleted = false
-			AND p2.isMenus = true
-			AND p2.permissionParent IS NULL
-		)
-	)
+    @Query("""
+SELECT DISTINCT p
+FROM Permission p
+WHERE p.isDeleted = false
+AND p.isMenus = true
+AND EXISTS (
+    SELECT 1
+    FROM PermissionRole pr, UserRoles ur
+    WHERE pr.id.permissionId = p.id
+    AND ur.id.roleId = pr.id.roleId
+    AND ur.id.userId = :userId
+)
+AND (
+    p.permissionParent IS NULL
+    OR EXISTS (
+        SELECT 1
+        FROM Permission parent
+        WHERE parent.id = p.permissionParent
+        AND parent.isDeleted = false
+        AND parent.isMenus = true
+        AND EXISTS (
+            SELECT 1
+            FROM PermissionRole pr2, UserRoles ur2
+            WHERE pr2.id.permissionId = parent.id
+            AND ur2.id.roleId = pr2.id.roleId
+            AND ur2.id.userId = :userId
+        )
+    )
+)
 """)
-    List<Permission> findPermissionsByUserID(@Param("userId") UUID userId);
+    List<Permission> findPermissionsByUserID(UUID userId);
+
+
 
     @Query(
             """

@@ -34,13 +34,13 @@ export interface RoleSearch {
 export async function searchRoles(dataSearch: RoleSearch) {
   const page = dataSearch.page ?? 0;
   const size = dataSearch.size ?? 10;
-  return API.post('api/roles/searchRoles', { ...dataSearch, page, size })
+  return API.post('/cms/roles/searchRoles', { ...dataSearch, page, size })
     .then((response) => response.data)
     .catch((error) => standardResponse(false, error.response?.data));
 }
 
 export async function createRole(role: Role) {
-  const url = `/roles/add`;
+  const url = `/cms/roles/add`;
 
   return API.post(url, role)
     .then((response) => {
@@ -50,7 +50,7 @@ export async function createRole(role: Role) {
 }
 
 export async function updateRole(role: Role) {
-  const url = `/roles/update`;
+  const url = `/cms/roles/update`;
 
   return API.post(url, role)
     .then((response) => {
@@ -60,7 +60,7 @@ export async function updateRole(role: Role) {
 }
 
 export async function deleteRole(id: string, version: number) {
-  const url = `/roles/delete?id=${id}&&version=${version}`;
+  const url = `/cms/roles/delete?id=${id}&&version=${version}`;
 
   return API.get(url)
     .then((response) => standardResponse(true, response))
@@ -68,7 +68,7 @@ export async function deleteRole(id: string, version: number) {
 }
 
 export async function lockRole(id: string, version: number) {
-  const url = `/roles/lock?id=${id}&&version=${version}`;
+  const url = `/cms/roles/lock?id=${id}&&version=${version}`;
 
   return API.get(url)
     .then((response) => standardResponse(true, response))
@@ -78,7 +78,7 @@ export async function lockRole(id: string, version: number) {
 export async function deleteMultiRole(
   items: { id: string; version: number }[]
 ) {
-  const url = `/roles/deleteMuti`;
+  const url = `/cms/roles/deleteMuti`;
 
   try {
     const response = await API.post(url, items);
@@ -89,7 +89,7 @@ export async function deleteMultiRole(
 }
 
 export async function getAllRole() {
-  let url = `api/roles/getAllRole`;
+  let url = `/cms/roles/getAllRole`;
 
   try {
     const response = await API.get(url);
@@ -100,7 +100,7 @@ export async function getAllRole() {
 }
 
 export async function LogDetailRole(id: string | null) {
-  let url = `api/roles/LogDetailRole?id=${id}`;
+  let url = `/cms/roles/LogDetailRole?id=${id}`;
 
   try {
     const response = await API.get(url);
@@ -111,7 +111,7 @@ export async function LogDetailRole(id: string | null) {
 }
 
 export async function getALlPermisstion() {
-  let url = `api/roles/getALlPermisstion`;
+  let url = `/cms/roles/getALlPermisstion`;
 
   try {
     const response = await API.get(url);
@@ -122,7 +122,7 @@ export async function getALlPermisstion() {
 }
 
 export async function getRolePermisstion(roleId: string | null) {
-  let url = `api/roles/getRolePermisstion?roleId=${roleId}`;
+  let url = `/cms/roles/getRolePermisstion?roleId=${roleId}`;
 
   try {
     const response = await API.get(url);
@@ -133,7 +133,7 @@ export async function getRolePermisstion(roleId: string | null) {
 }
 
 export async function getRolePermissionsHalf(roleId: string | null) {
-  let url = `api/roles/getRolePermissionsHalf?roleId=${roleId}`;
+  let url = `/cms/roles/getRolePermissionsHalf?roleId=${roleId}`;
 
   try {
     const response = await API.get(url);
@@ -148,7 +148,7 @@ export async function saveRolePermisstion(
   checkedKeys: string[],
   checkedHalfKeys: string[]
 ) {
-  let url = `api/roles/updateRolePermisstion`;
+  let url = `/cms/roles/updateRolePermisstion`;
   const playload = { roleId, checkedKeys, checkedHalfKeys };
   try {
     const response = await API.post(url, playload);
@@ -165,7 +165,7 @@ export async function checkDeleteMulti(
     version: number;
   }[]
 ) {
-  const url = `/roles/checkDeleteMulti`;
+  const url = `/cms/roles/checkDeleteMulti`;
 
   try {
     const response = await API.post(url, items);
@@ -176,7 +176,7 @@ export async function checkDeleteMulti(
 }
 
 export async function getUserPermissions() {
-  let url = `api/roles/getUserPermissions`;
+  let url = `/cms/roles/getUserPermissions`;
 
   try {
     const response = await API.get(url);
@@ -187,7 +187,7 @@ export async function getUserPermissions() {
 }
 
 export async function getUserOriginDataPermissions() {
-  let url = `api/roles/getUserOriginDataPermissions`;
+  let url = `/cms/roles/getUserOriginDataPermissions`;
 
   try {
     const response = await API.get(url);
@@ -198,7 +198,7 @@ export async function getUserOriginDataPermissions() {
 }
 
 export async function getPermissionsCurrent(menu: String | null) {
-  let url = `api/roles/getPermissionsCurrent?menuCode=${menu}`;
+  let url = `/cms/roles/getPermissionsCurrent?menuCode=${menu}`;
 
   try {
     const response = await API.get(url);

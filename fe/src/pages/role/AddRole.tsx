@@ -154,7 +154,7 @@ export const AddRoleModal: React.FC<AddRoleModalProps> = ({
                     const regex = /^[A-Z][A-Z0-9_\-]*$/;
                     if (!regex.test(sanitized)) {
                       return Promise.reject(
-                        new Error(t('originData.domain.InvalidCodeFormat'))
+                        new Error(t('authentication.InvalidCodeFormat'))
                       );
                     }
                     return Promise.resolve();

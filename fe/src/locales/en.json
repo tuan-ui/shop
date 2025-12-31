@@ -27,7 +27,8 @@
     "checkGmail": "Please check your mailbox (including Spam/Junk)",
     "NoUserFound": "No account found with this username and phone number.",
     "NoEmailLink": "The account does not have an email linked. Please contact the administrator.",
-    "SendEmailError": "The email could not be sent. Please try again later."
+    "SendEmailError": "The email could not be sent. Please try again later.",
+    "InvalidCodeFormat": "Invalid code format"
   },
   "common": {
     "search": "Search",

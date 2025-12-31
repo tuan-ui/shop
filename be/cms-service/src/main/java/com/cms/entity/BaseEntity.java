@@ -56,9 +56,6 @@ public abstract class BaseEntity {
         if (createAt == null) {
             createAt = LocalDateTime.now();
         }
-        if (updateAt == null) {
-            updateAt = LocalDateTime.now();
-        }
     }
 
     @PreUpdate

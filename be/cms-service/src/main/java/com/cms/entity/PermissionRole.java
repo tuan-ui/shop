@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "PERMISSIONS_ROLES")
+@Table(name = "permissions_roles")
 public class PermissionRole {
 
     @EmbeddedId

@@ -27,7 +27,8 @@
     "checkGmail": "Vui lòng kiểm tra hộp thư (kể cả Spam/Junk)",
     "NoUserFound": "Không tìm thấy tài khoản với tên đăng nhập và số điện thoại này.",
     "NoEmailLink": "Tài khoản chưa liên kết email. Vui lòng liên hệ quản trị viên.",
-    "SendEmailError": "Không thể gửi email. Vui lòng thử lại sau."
+    "SendEmailError": "Không thể gửi email. Vui lòng thử lại sau.",
+    "InvalidCodeFormat": "Định dạng mã không hợp lệ"
   },
   "common": {
     "search": "tìm kiếm",

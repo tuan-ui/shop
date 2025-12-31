@@ -44,7 +44,6 @@ export async function login(username: string, password: string) {
         username: object.username,
         fullName: object.fullName,
         email: object.email,
-        statusAccount: object.status,
         phone: object.phone,
         roles: object.roles,
         userId: object.user_id,
