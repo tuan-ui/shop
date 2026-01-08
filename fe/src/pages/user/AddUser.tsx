@@ -42,7 +42,6 @@ export const AddUser: React.FC<UserFormProps> = ({
 
   const [form] = Form.useForm();
   const [avatarUrl, setAvatarUrl] = useState<string>();
-  const [signatureUrl, setSignatureUrl] = useState<string>();
   const [roles, setRoles] = useState<Role[]>([]);
   const [loadingRole, setLoadingRole] = useState(false);
   const initialValuesRef = useRef<Record<string, any> | null>(null);
@@ -52,7 +51,6 @@ export const AddUser: React.FC<UserFormProps> = ({
       form.resetFields();
       initialValuesRef.current = null;
       setAvatarUrl(undefined);
-      setSignatureUrl(undefined);
       return;
     }
     const fetchAllRole = async () => {
@@ -80,12 +78,10 @@ export const AddUser: React.FC<UserFormProps> = ({
     const loadImages = async () => {
       if (user && user.id) {
         try {
-          const [avatarUrl, signatureUrl] = await Promise.all([
+          const [avatarUrl] = await Promise.all([
             getUserImage(user.id, 'profile'),
-            getUserImage(user.id, 'signature'),
           ]);
           setAvatarUrl(avatarUrl);
-          setSignatureUrl(signatureUrl);
         } catch (err) {
           console.error('Error loading user images:', err);
         }
@@ -95,7 +91,7 @@ export const AddUser: React.FC<UserFormProps> = ({
     if (user) {
       const initialValues = {
         ...user,
-        birthday: user.birthday ? dayjs(user.birthday) : undefined,
+        birthDay : user.birthDay  ? dayjs(user.birthDay ) : undefined,
         issueDate: user.issueDate ? dayjs(user.issueDate) : undefined,
         gender: user.gender !== null ? (user.gender ? '1' : '0') : null,
       };
@@ -105,7 +101,6 @@ export const AddUser: React.FC<UserFormProps> = ({
     } else {
       form.resetFields();
       setAvatarUrl(undefined);
-      setSignatureUrl(undefined);
       initialValuesRef.current = {};
     }
     fetchAllRole();
@@ -167,19 +162,10 @@ export const AddUser: React.FC<UserFormProps> = ({
           formData.append(key, value ?? '');
         }
       });
-      if (user?.id) {
-        formData.append('version', user?.version.toString());
-      }
       if (values.profileImage && values.profileImage.fileList?.length > 0) {
         const fileObj = values.profileImage.fileList[0].originFileObj;
         if (fileObj) formData.append('profileImage', fileObj);
       }
-
-      if (values.signatureImage && values.signatureImage.fileList?.length > 0) {
-        const fileObj = values.signatureImage.fileList[0].originFileObj;
-        if (fileObj) formData.append('signatureImage', fileObj);
-      }
-
       const success = await onSubmit?.(formData);
       if (success) {
         form.resetFields();
@@ -247,35 +233,6 @@ export const AddUser: React.FC<UserFormProps> = ({
               </Avatar>
             </Upload>
           </Form.Item>
-
-          {/* Signature upload */}
-          <Form.Item
-            name="signatureImage"
-            label={t('user.signature')}
-            labelCol={{ span: 24, style: { textAlign: 'center' } }}
-            wrapperCol={{ span: 24, style: { textAlign: 'center' } }}
-          >
-            <Upload
-              listType="picture-circle"
-              showUploadList={false}
-              beforeUpload={() => false}
-              onChange={(info) => {
-                const file = info.file as unknown as File;
-                if (file) {
-                  setSignatureUrl(URL.createObjectURL(file));
-                  form.setFieldValue('signatureImage', file);
-                }
-              }}
-            >
-              <Avatar
-                size={100}
-                src={signatureUrl}
-                style={{ cursor: 'pointer' }}
-              >
-                {t('common.upload')}
-              </Avatar>
-            </Upload>
-          </Form.Item>
         </div>
         <div
           style={{
@@ -313,7 +270,7 @@ export const AddUser: React.FC<UserFormProps> = ({
           </Form.Item>
 
           <Form.Item
-            name="birthday"
+            name="birthDay"
             label={t('user.birthday')}
             rules={[{ required: true, message: t('user.RequiedBirthday') }]}
           >

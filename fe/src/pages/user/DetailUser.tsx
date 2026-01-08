@@ -1,6 +1,6 @@
 import { Modal, Button, Avatar, Divider } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { getUserImage, LogDetailUser } from '../../api/userApi';
+import { getUserImage } from '../../api/userApi';
 import { useEffect, useState } from 'react';
 
 interface DetailUserProps {
@@ -32,16 +32,6 @@ export const DetailUser: React.FC<DetailUserProps> = ({
         }
       }
     };
-    const handleSearch = async () => {
-      try {
-        const values = await LogDetailUser(user.id);
-      } catch (err) {
-        console.warn('Validation failed:', err);
-      }
-    };
-    if (open) {
-      handleSearch();
-    }
 
     loadImages();
   }, [user]);

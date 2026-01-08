@@ -30,6 +30,6 @@ public final class Constants {
     }
 
     public static interface upload{
-        public String IMAGE_DIRECTORY = AppConfig.get("save_path");
+        public String IMAGE_DIRECTORY = "C:/u02";
     }
 }

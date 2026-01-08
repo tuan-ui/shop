@@ -38,7 +38,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             String authorizationHeader = request.getHeader("Authorization");
             String path = request.getRequestURI();
-            if (path.contains("/api/auth/refreshToken") || path.contains("/api/auth/login")) {
+            if (path.contains("/cms/auth/refreshToken") || path.contains("/cms/auth/login")) {
                 filterChain.doFilter(request, response);
                 return;
             }

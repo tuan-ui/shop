@@ -52,7 +52,7 @@ export interface UserSearch {
 export async function searchUsers(search: UserSearch) {
   const page = search.page ?? 0;
   const size = search.size;
-  let url = `api/users/list?page=${page}&size=${size}`;
+  let url = `cms/users/list?page=${page}&size=${size}`;
 
   const params = [
     search.searchString
@@ -90,7 +90,7 @@ export async function searchUsers(search: UserSearch) {
 }
 
 export async function createUser(formData: FormData) {
-  const url = `/users/add`;
+  const url = `cms/users/add`;
   try {
     const response = await API.post(url, formData, {
       headers: {
@@ -108,7 +108,7 @@ export async function createUser(formData: FormData) {
 }
 
 export async function updateUser(formData: FormData) {
-  const url = `/users/update`;
+  const url = `cms/users/update`;
   try {
     const response = await API.post(url, formData, {
       headers: {
@@ -126,7 +126,7 @@ export async function updateUser(formData: FormData) {
 }
 
 export async function deleteUser(id: string , version: number) {
-  const url = `/users/delete?id=${id}&&version=${version}`;
+  const url = `cms/users/delete?id=${id}&&version=${version}`;
 
   return API.get(url)
     .then((response) => standardResponse(true, response))
@@ -134,7 +134,7 @@ export async function deleteUser(id: string , version: number) {
 }
 
 export async function lockUser(id: string , version: number) {
-  const url = `/users/lock?id=${id}&&version=${version}`;
+  const url = `cms/users/lock?id=${id}&&version=${version}`;
 
   return API.get(url)
     .then((response) => standardResponse(true, response))
@@ -144,7 +144,7 @@ export async function lockUser(id: string , version: number) {
 export async function deleteMultiUser(
   items: { id: string; version: number }[]
 ) {
-  const url = `/users/deleteMuti`;
+  const url = `cms/users/deleteMuti`;
 
   try {
     const response = await API.post(url, items);
@@ -158,7 +158,7 @@ export async function getUserImage(
   userId: string | null,
   type: 'profile' | 'signature'
 ): Promise<string> {
-  const url = `/users/getImage?id=${userId ?? ''}&type=${type}`;
+  const url = `cms/users/getImage?id=${userId ?? ''}&type=${type}`;
 
   try {
     const response = await API.get<Blob>(url, {
@@ -173,7 +173,7 @@ export async function getUserImage(
 }
 
 export async function getUserProfile() {
-  const url = `/users/getUserById`;
+  const url = `cms/users/getUserById`;
 
   return API.get(url)
     .then((response) => response.data)
@@ -181,7 +181,7 @@ export async function getUserProfile() {
 }
 
 export async function updateImage(formData: FormData) {
-  const url = `/users/updateImage`;
+  const url = `cms/users/updateImage`;
   try {
     const response = await API.post(url, formData, {
       headers: {
@@ -198,17 +198,6 @@ export async function updateImage(formData: FormData) {
   }
 }
 
-export async function LogDetailUser(id: string) {
-  let url = `api/users/LogDetailUser?id=${id}`;
-
-  try {
-    const response = await API.get(url);
-    return response.data;
-  } catch (error: any) {
-    return standardResponse(false, error.response?.data);
-  }
-}
-
 export async function checkDeleteMulti(
   items: {
     id: string;
@@ -217,7 +206,7 @@ export async function checkDeleteMulti(
     version: number;
   }[]
 ) {
-  const url = `/users/checkDeleteMulti`;
+  const url = `cms/users/checkDeleteMulti`;
 
   try {
     const response = await API.post(url, items);

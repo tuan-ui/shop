@@ -2,9 +2,6 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
   import {notification } from 'antd';
 import { getLocalToken, clearLocalStorage} from './storage';
-import {
-  initKeepAlive,
-} from './sessionKeepAlive';
 import { t } from 'i18next';
 
 const viteApi = (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_API_URL) || undefined;
@@ -53,9 +50,6 @@ API.interceptors.request.use((request: import('axios').InternalAxiosRequestConfi
   }
   return request;
 });
-
-initKeepAlive();
-
 
 export function standardResponse<T = any>(success: boolean, message: T) {
   return {

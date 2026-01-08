@@ -127,7 +127,7 @@ export const DefaultUserPage = () => {
           (user: User) => ({
             ...user,
             userName: user.username,
-            roleIds: user.roleIds ? user.roleIds.split(',') : [],
+            roleIds: user.listRole ? user.listRole.split(',') : [],
           })
         );
         setUsers(usersWithUserName);
