@@ -1,11 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
-  import {notification } from 'antd';
-import { getLocalToken, clearLocalStorage} from './storage';
+import { notification } from 'antd';
+import { getLocalToken, clearLocalStorage } from './storage';
 import { t } from 'i18next';
 
-const viteApi = (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_API_URL) || undefined;
-const baseURL = (window as any).REACT_APP_API_URL || viteApi || process.env.VITE_API_URL;
+const viteApi =
+  (typeof import.meta !== 'undefined' &&
+    (import.meta as any).env?.VITE_API_URL) ||
+  undefined;
+const baseURL =
+  (window as any).REACT_APP_API_URL || viteApi || process.env.VITE_API_URL;
 
 export const API: AxiosInstance = axios.create({
   baseURL,
@@ -19,7 +23,10 @@ export const API: AxiosInstance = axios.create({
 API.interceptors.response.use(
   (response: AxiosResponse) => {
     if (response.status !== 200) {
-      if (response.data.status === 498 || response.data.code === "JWT_EXPIRED") {
+      if (
+        response.data.status === 498 ||
+        response.data.code === 'JWT_EXPIRED'
+      ) {
         clearLocalStorage(true);
       }
     }
@@ -40,16 +47,25 @@ API.interceptors.response.use(
   }
 );
 
-API.interceptors.request.use((request: import('axios').InternalAxiosRequestConfig) => {
-  try {
-    console.debug('[API] request to', request?.url, 'baseURL=', request?.baseURL || baseURL);
-  } catch (e) { /* empty */ }
-  const token = getLocalToken();
-  if (token && request.headers) {
-    (request.headers as any).Authorization = 'Bearer ' + token;
+API.interceptors.request.use(
+  (request: import('axios').InternalAxiosRequestConfig) => {
+    try {
+      console.debug(
+        '[API] request to',
+        request?.url,
+        'baseURL=',
+        request?.baseURL || baseURL
+      );
+    } catch (e) {
+      /* empty */
+    }
+    const token = getLocalToken();
+    if (token && request.headers) {
+      (request.headers as any).Authorization = 'Bearer ' + token;
+    }
+    return request;
   }
-  return request;
-});
+);
 
 export function standardResponse<T = any>(success: boolean, message: T) {
   return {
@@ -81,7 +97,11 @@ APICookie.interceptors.response.use(
   (response: AxiosResponse) => {
     if (response.status !== 200) {
       const title = response.data?.title;
-      if (title === 'Unauthorized' || title === 'User was locked' || title === 'User not found') {
+      if (
+        title === 'Unauthorized' ||
+        title === 'User was locked' ||
+        title === 'User not found'
+      ) {
         clearLocalStorage(true);
       }
       notification.error({
@@ -102,12 +122,14 @@ APICookie.interceptors.response.use(
   }
 );
 
-APICookie.interceptors.request.use((request: import('axios').InternalAxiosRequestConfig) => {
-  const token = getLocalToken();
-  if (token && request.headers) {
-    (request.headers as any).Authorization = 'Bearer ' + token;
+APICookie.interceptors.request.use(
+  (request: import('axios').InternalAxiosRequestConfig) => {
+    const token = getLocalToken();
+    if (token && request.headers) {
+      (request.headers as any).Authorization = 'Bearer ' + token;
+    }
+    return request;
   }
-  return request;
-});
+);
 
 export default API;

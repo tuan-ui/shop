@@ -21,12 +21,11 @@ import {
   DefaultRolePage,
   DefaultUserPage,
 } from '../pages';
-import { DashboardLayout } from '../layouts';
 import React, { ReactNode, Suspense } from 'react';
 import { PATH_SYSTEM } from '../constants';
 import ProtectedRoute from './ProtectedRoute';
-import { PasswordResetResultPage } from '../pages/authentication/ForgotPasswordModal';
-import { DefaultDashboardPage } from '../pages/dashboards';
+import { PasswordResetResultPage } from '../pages/admin/authentication/ForgotPasswordModal';
+import { DashboardLayout } from '../pages/admin/dashboards';
 
 // Custom scroll restoration function
 
@@ -142,7 +141,7 @@ const router = createBrowserRouter([
       {
         index: true,
         path: '',
-        element: <DefaultDashboardPage />,
+        element: <DashboardLayout />,
       },
     ],
   },
@@ -154,7 +153,7 @@ const router = createBrowserRouter([
       {
         index: true,
         path: 'default',
-        element: <DefaultDashboardPage />,
+        element: <DashboardLayout />,
       },
       {
         path: 'roles',

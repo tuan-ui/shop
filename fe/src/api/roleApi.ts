@@ -13,9 +13,9 @@ export async function countRoles(
   roleName?: string,
   status?: string
 ) {
-  const url = `/role/count?id=${id ?? ''}&roleName=${
-    roleName ?? ''
-  }&status=${status ?? ''}`;
+  const url = `/role/count?id=${id ?? ''}&roleName=${roleName ?? ''}&status=${
+    status ?? ''
+  }`;
 
   return API.get(url)
     .then((response) => standardResponse(true, response))

@@ -1,7 +1,7 @@
 import { API, standardResponse } from '../utils/middleware';
 export interface Role {
-  id:string;
-  roleName:string;
+  id: string;
+  roleName: string;
 }
 export interface User {
   id: string;
@@ -16,7 +16,7 @@ export interface User {
   identifyCode: string;
   issueDateStr: string;
   issuePlace: string;
-  lstRole:Role[];
+  lstRole: Role[];
   [key: string]: any;
 }
 
@@ -125,7 +125,7 @@ export async function updateUser(formData: FormData) {
   }
 }
 
-export async function deleteUser(id: string , version: number) {
+export async function deleteUser(id: string, version: number) {
   const url = `cms/users/delete?id=${id}&&version=${version}`;
 
   return API.get(url)
@@ -133,7 +133,7 @@ export async function deleteUser(id: string , version: number) {
     .catch((error) => standardResponse(false, error.response?.data));
 }
 
-export async function lockUser(id: string , version: number) {
+export async function lockUser(id: string, version: number) {
   const url = `cms/users/lock?id=${id}&&version=${version}`;
 
   return API.get(url)

@@ -21,10 +21,17 @@ export const usePagePermission = (menuCode: string) => {
     try {
       setLoading(true);
       const res = await getPermissionsCurrent(menuCode);
-      setPermissions(res || { add: false, edit: false, delete: false, permission: false });
+      setPermissions(
+        res || { add: false, edit: false, delete: false, permission: false }
+      );
     } catch (e) {
       console.error('Error fetching permissions', e);
-      setPermissions({ add: false, edit: false, delete: false, permission: false });
+      setPermissions({
+        add: false,
+        edit: false,
+        delete: false,
+        permission: false,
+      });
     } finally {
       setLoading(false);
     }

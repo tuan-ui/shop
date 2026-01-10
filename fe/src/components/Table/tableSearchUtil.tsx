@@ -91,7 +91,12 @@ export function useColumnSearch<T>({
     getColumnSearchProps: () => ({
       // expose current filtered value to AntD so the table knows when this column is filtered
       filteredValue: searchText ? [searchText] : undefined,
-      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }: FilterDropdownProps) => {
+      filterDropdown: ({
+        setSelectedKeys,
+        selectedKeys,
+        confirm,
+        clearFilters,
+      }: FilterDropdownProps) => {
         // store these handlers so external resetSearch() can clear AntD filter state
         setSelectedKeysRef.current = setSelectedKeys ?? null;
         clearFiltersRef.current = clearFilters ?? null;
@@ -99,13 +104,16 @@ export function useColumnSearch<T>({
           <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
             <Input
               ref={searchInput}
-              placeholder={t('common.enterKeyword', { field: t(`search.${String(dataIndex)}`) })}
+              placeholder={t('common.enterKeyword', {
+                field: t(`search.${String(dataIndex)}`),
+              })}
               value={inputValue}
               maxLength={255}
               onChange={(e) => {
                 const sanitized = sanitizeInput(e.target.value);
                 setInputValue(sanitized);
-                setSelectedKeys && setSelectedKeys(sanitized ? [sanitized] : []);
+                setSelectedKeys &&
+                  setSelectedKeys(sanitized ? [sanitized] : []);
               }}
               onPressEnter={() => {
                 // only search when there's a non-empty value
@@ -113,7 +121,8 @@ export function useColumnSearch<T>({
                   handleSearch(selectedKeys as string[], confirm);
                   setTimeout(() => {
                     clearFiltersRef.current?.() ?? clearFilters?.();
-                    setSelectedKeysRef.current?.([]) ?? (setSelectedKeys && setSelectedKeys([]));
+                    setSelectedKeysRef.current?.([]) ??
+                      (setSelectedKeys && setSelectedKeys([]));
                     setInputValue('');
                     if (searchInput.current?.input) {
                       searchInput.current.input.value = '';
@@ -132,7 +141,8 @@ export function useColumnSearch<T>({
                   handleSearch(selectedKeys as string[], confirm);
                   setTimeout(() => {
                     clearFiltersRef.current?.() ?? clearFilters?.();
-                    setSelectedKeysRef.current?.([]) ?? (setSelectedKeys && setSelectedKeys([]));
+                    setSelectedKeysRef.current?.([]) ??
+                      (setSelectedKeys && setSelectedKeys([]));
                     setInputValue('');
                     if (searchInput.current?.input) {
                       searchInput.current.input.value = '';
@@ -146,7 +156,9 @@ export function useColumnSearch<T>({
                 {t('common.Search')}
               </Button>
               <Button
-                onClick={() => handleReset(clearFilters, confirm, setSelectedKeys)}
+                onClick={() =>
+                  handleReset(clearFilters, confirm, setSelectedKeys)
+                }
                 size="small"
                 style={{ width: 90 }}
               >

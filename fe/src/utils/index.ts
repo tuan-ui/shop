@@ -165,8 +165,7 @@ export const isColorLight = (color: string): boolean => {
   return brightness > 155;
 };
 
-export const goToTop = () => {
-};
+export const goToTop = () => {};
 
 export const numberWithCommas = (x: number) => {
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');

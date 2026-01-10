@@ -8,7 +8,10 @@ interface ChildMenuGuardProps {
   children: React.ReactNode;
 }
 
-export const ChildMenuGuard: React.FC<ChildMenuGuardProps> = ({ menuCode, children }) => {
+export const ChildMenuGuard: React.FC<ChildMenuGuardProps> = ({
+  menuCode,
+  children,
+}) => {
   const [hasAccess, setHasAccess] = useState<boolean | null>(null);
   const { t } = useTranslation();
 
@@ -20,10 +23,11 @@ export const ChildMenuGuard: React.FC<ChildMenuGuardProps> = ({ menuCode, childr
         return;
       }
 
-      const allowed = res.object.some((p: any) =>
-        p.permissionCode === menuCode &&
-        p.isMenus === true &&
-        p.isDeleted === false
+      const allowed = res.object.some(
+        (p: any) =>
+          p.permissionCode === menuCode &&
+          p.isMenus === true &&
+          p.isDeleted === false
       );
 
       setHasAccess(allowed);
@@ -47,9 +51,11 @@ export const ChildMenuGuard: React.FC<ChildMenuGuardProps> = ({ menuCode, childr
   }
 
   if (!hasAccess) {
-    return <div style={{ padding: 24, color: '#999', textAlign: 'center' }}>
-      {t('error.NoPermission')}
-    </div>;
+    return (
+      <div style={{ padding: 24, color: '#999', textAlign: 'center' }}>
+        {t('error.NoPermission')}
+      </div>
+    );
   }
 
   return <>{children}</>;

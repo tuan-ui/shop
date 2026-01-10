@@ -14,7 +14,7 @@ export const PageHeader = ({ breadcrumbs, title, ...others }: Props) => {
   const mergedStyle = { ...incomingStyle, ...overrideStyle };
   return (
     <div {...others} style={mergedStyle}>
-      <Space direction="vertical" size="small" >
+      <Space direction="vertical" size="small">
         <Typography.Title
           level={4}
           style={{ padding: 0, margin: 0, textTransform: 'capitalize' }}

@@ -8,8 +8,7 @@ export default defineConfig({
     },
   },
   resolve: {
-    alias: {
-    },
+    alias: {},
   },
   server: {
     host: 'localhost',

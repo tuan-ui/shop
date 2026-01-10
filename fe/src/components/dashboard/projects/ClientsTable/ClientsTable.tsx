@@ -1,4 +1,4 @@
-import { Table, type TableProps } from "antd";
+import { Table, type TableProps } from 'antd';
 
 interface Clients {
   id: number;

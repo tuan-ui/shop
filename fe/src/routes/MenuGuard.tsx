@@ -83,10 +83,7 @@ export const MenuGuard: React.FC<MenuGuardProps> = ({ menuCode, children }) => {
 
   if (hasAccess === null) {
     return (
-      <Spin
-        tip="..."
-        style={{ margin: '100px auto', display: 'block' }}
-      />
+      <Spin tip="..." style={{ margin: '100px auto', display: 'block' }} />
     );
   }
 
