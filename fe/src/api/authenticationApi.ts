@@ -4,7 +4,7 @@ import { API, standardResponse } from '../utils/middleware';
 type StandardResponse<T = any> = { success: boolean; message: T };
 
 export async function refreshToken(token: string) {
-  const url = '/customer/auth/refreshToken';
+  const url = '/cms/auth/refreshToken';
   const params = { refreshToken: token };
 
   try {
@@ -17,7 +17,7 @@ export async function refreshToken(token: string) {
 }
 
 export async function login(username: string, password: string) {
-  const url = '/customer/auth/login';
+  const url = '/cms/auth/login';
   const params = { username, password };
   console.debug('[auth] login called for', username);
   try {
@@ -83,7 +83,7 @@ export async function changePassword(
   userId: string | number,
   userNewPassword: string
 ) {
-  const url = '/customer/auth/changePassword';
+  const url = '/cms/auth/changePassword';
   const params = { staffPassword, userId, userNewPassword };
   try {
     const response = await API.post(url, params);
