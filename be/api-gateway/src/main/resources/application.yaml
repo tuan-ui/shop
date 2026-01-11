@@ -16,3 +16,9 @@ spring:
           - Path=${app.api-prefix}/cms/**
           filters:
           - StripPrefix=2
+        - id: customer_service
+          uri: http://localhost:8081
+          predicates:
+            - Path=${app.api-prefix}/customer/**
+          filters:
+            - StripPrefix=2

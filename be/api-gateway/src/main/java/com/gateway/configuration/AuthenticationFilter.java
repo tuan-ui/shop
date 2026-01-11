@@ -39,7 +39,8 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
     @NonFinal
     private String[] publicEndpoints = {
             "/cms/auth/login",
-            "/cms/users/registration"
+            "/customer/auth/login",
+            "/customer/users/registration"
     };
 
     @Value("${app.api-prefix}")
