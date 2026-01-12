@@ -4,7 +4,7 @@ import { API, standardResponse } from '../utils/middleware';
 type StandardResponse<T = any> = { success: boolean; message: T };
 
 export async function refreshToken(token: string) {
-  const url = '/cms/auth/refreshToken';
+  const url = '/auth/refreshToken';
   const params = { refreshToken: token };
 
   try {
@@ -17,7 +17,7 @@ export async function refreshToken(token: string) {
 }
 
 export async function login(username: string, password: string) {
-  const url = '/cms/auth/login';
+  const url = '/auth/login';
   const params = { username, password };
   console.debug('[auth] login called for', username);
   try {
@@ -83,7 +83,7 @@ export async function changePassword(
   userId: string | number,
   userNewPassword: string
 ) {
-  const url = '/cms/auth/changePassword';
+  const url = '/auth/changePassword';
   const params = { staffPassword, userId, userNewPassword };
   try {
     const response = await API.post(url, params);
@@ -92,12 +92,6 @@ export async function changePassword(
     return standardResponse(false, error.response?.data);
   }
 }
-
-export async function logLogin(roleUserDeptId: string | number) {
-  const response = await API.post(`/auth/logLogin`, roleUserDeptId);
-  return response.data;
-}
-
 let cachedAvatar: string | null = null;
 let cachedUserId: string | number | null = null;
 
@@ -132,12 +126,13 @@ export async function getUserImageNav(
   }
 }
 
-export async function logOut() {
-  const response = await API.post(`/auth/logout`);
+export function logOut() {
+  localStorage.removeItem('accessToken');
+  localStorage.removeItem('refreshToken');
   cachedAvatar = null;
   cachedUserId = null;
-  return response.data;
 }
+
 
 export async function forgetPassword(username: string, phone: string) {
   const url = '/auth/forgetPassword';

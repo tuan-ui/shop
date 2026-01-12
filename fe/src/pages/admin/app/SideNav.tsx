@@ -80,11 +80,9 @@ function convertToMenuItems(
       return {
         key: node.permissionUrl || node.permissionCode,
         label: node.permissionUrl ? (
-          <Tooltip title={t(node.permissionName)} placement="bottom">
-            <Link to={node.permissionUrl}>
-              <span style={{ color: 'inherit' }}>{t(node.permissionName)}</span>
-            </Link>
-          </Tooltip>
+          <Link to={node.permissionUrl}>
+            <span style={{ color: 'inherit' }}>{t(node.permissionName)}</span>
+          </Link>
         ) : (
           t(node.permissionName)
         ),
@@ -241,7 +239,7 @@ const SideNav: React.FC<SideNavProps> = ({
       <Logo
         color="blue"
         asLink
-        href="/home"
+        href="/admin/system"
         justify="center"
         gap="small"
         imgSize={{ h: 28, w: 28 }}
@@ -272,7 +270,10 @@ const SideNav: React.FC<SideNavProps> = ({
           selectedKeys={selectedKeys}
           openKeys={openKeys}
           onOpenChange={(keys) => setOpenKeys(keys as string[])}
-          onClick={(e) => navigate(e.key)}
+          onClick={(e) => {
+            navigate(e.key);
+            setOpenKeys((prev) => Array.from(new Set([...prev, e.keyPath[1]])));
+          }}
           style={{
             border: 'none',
             background: '#fff',

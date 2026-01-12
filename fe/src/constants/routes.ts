@@ -1,11 +1,11 @@
 function path(root: string, sublink: string) {
   return `${root}${sublink}`;
 }
-const ROOTS_AUTH = '/auth';
+const ROOTS_AUTH = '/admin/auth';
 const ROOTS_ERRORS = '/errors';
-const ROOTS_SYSTEM = '/system';
-const ROOTS_DOCS = '/docs';
-const ROOTS_DND = '/dnd';
+const ROOTS_SYSTEM = '/admin/system';
+const ROOTS_ADMIN = '/admin';
+const ROOTS_CLIENT = '/client';
 
 export const PATH_HOME = {
   root: ROOTS_SYSTEM,
@@ -19,10 +19,10 @@ export const PATH_SYSTEM = {
 
 export const PATH_AUTH = {
   root: ROOTS_AUTH,
-  signin: path(ROOTS_AUTH, '/signin'),
-  signup: path(ROOTS_AUTH, '/signup'),
-  passwordReset: path(ROOTS_AUTH, '/password-reset'),
-  passwordConfirm: path(ROOTS_AUTH, '/password-confirmation'),
+  signin: path(ROOTS_ADMIN, '/auth/signin'),
+  signup: path(ROOTS_ADMIN, '/auth/signup'),
+  passwordReset: path(ROOTS_ADMIN, '/auth/password-reset'),
+  passwordConfirm: path(ROOTS_ADMIN, '/auth/password-confirmation'),
   welcome: path(ROOTS_AUTH, '/welcome'),
   verifyEmail: path(ROOTS_AUTH, '/verify-email'),
   accountDelete: path(ROOTS_AUTH, '/account-delete'),

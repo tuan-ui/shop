@@ -3,6 +3,7 @@ import { getUserPermissions, getPermissionsCurrent } from '../api/roleApi';
 import { notification } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { PATH_HOME } from '../constants';
 
 export interface MenuActions {
   add: boolean;
@@ -66,7 +67,7 @@ export const useMenuPermission = (menuCode: string) => {
         duration: 5,
       });
       const listPath = location.pathname.replace(/\/(add|edit)(\/.*)?$/, '');
-      navigate(listPath || '/home', { replace: true });
+      navigate(listPath || PATH_HOME.root, { replace: true });
     }
   }, [actions, loading, location.pathname, navigate, t]);
 

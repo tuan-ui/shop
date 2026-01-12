@@ -38,7 +38,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
 
     @NonFinal
     private String[] publicEndpoints = {
-            "/cms/auth/login",
+            "/auth/login",
             "/customer/auth/login",
             "/customer/users/registration"
     };

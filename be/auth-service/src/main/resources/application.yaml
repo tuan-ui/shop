@@ -1,0 +1,19 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /auth
+
+spring:
+  application:
+    name: auth-service
+  datasource:
+    url: jdbc:mariadb://localhost:3306/cms
+    driverClassName: org.mariadb.jdbc.Driver
+    username: root
+    password: root
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+jwt:
+  secretKey: e0399e8ff47111a4d0ccca8d5d114f7c2a6657d591854db8b214bbd6c85b8c51

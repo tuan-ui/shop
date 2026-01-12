@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button, ButtonProps } from 'antd';
 import { LeftOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
+import { PATH_HOME } from '../../constants';
 
 type Props = {
   wIcon?: boolean;
@@ -14,7 +15,7 @@ export const BackBtn = ({ wIcon, iconOnly, ...others }: Props) => {
   return (
     <Button
       icon={wIcon || iconOnly ? <LeftOutlined /> : null}
-      onClick={() => navigate('/home')}
+      onClick={() => navigate(PATH_HOME.root)}
       {...others}
     >
       {!iconOnly && t('common.backHome')}

@@ -21,7 +21,7 @@
     </properties>
 
     <modules>
-        <module>cms-service</module>
+        <module>auth-service</module>
         <module>api-gateway</module>
         <module>customer-service</module>
     </modules>

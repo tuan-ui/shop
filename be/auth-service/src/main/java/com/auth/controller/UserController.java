@@ -1,0 +1,586 @@
+package com.auth.controller;
+
+import com.auth.constant.Constants;
+import com.auth.dto.request.DeleteMultiDTO;
+import com.auth.dto.request.UserRequestDTO;
+import com.auth.dto.response.ErrorListResponse;
+import com.auth.dto.response.UserResponse;
+import com.auth.entity.User;
+import com.auth.repository.UserRepository;
+import com.auth.response.ResponseAPI;
+import com.auth.service.UserService;
+import com.auth.utils.DateUtil;
+import io.micrometer.common.util.StringUtils;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.core.io.Resource;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
+
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.ParseException;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+
+@RestController
+@RequestMapping("/users")
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Slf4j
+public class UserController {
+    private final UserService userService;
+    private final UserRepository userRepository;
+
+
+    @GetMapping("/list")
+    public ResponseAPI listUsers(
+            @RequestParam(value = "searchString", required = false, defaultValue = "") String searchString,
+            @RequestParam(value = "userName", required = false, defaultValue = "") String userName,
+            @RequestParam(value = "fullName", required = false, defaultValue = "") String fullName,
+            @RequestParam(value = "phone", required = false, defaultValue = "") String phone,
+            @RequestParam(value = "birthday", required = false, defaultValue = "") String birthday,
+            @RequestParam(value = "birthdayStr", required = false, defaultValue = "") String birthdayStr,
+            @RequestParam(value = "userCode", required = false, defaultValue = "") String userCode,
+            @RequestParam(value = "roleId", required = false) Long roleId,
+            @RequestParam(value = "departmentId", required = false) Long departmentId,
+            @RequestParam(value = "status", required = false) Integer status,
+            @RequestParam(value = "page", required = false, defaultValue = "0") int page,
+            @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            User userDetails = (User) authentication.getPrincipal();
+
+            Pageable pageable = PageRequest.of(page, size);
+            Page<UserResponse> users = userService.listUsers(searchString, userName, fullName, phone, birthdayStr,
+                    userCode, userDetails, pageable);
+            return new ResponseAPI(users, Constants.messageResponse.SUCCESS, 200);
+        } catch (Exception e) {
+            return new ResponseAPI(null, e.getMessage(), 500);
+        }
+    }
+
+
+
+    @GetMapping("/delete")
+    public ResponseEntity<ResponseAPI> deleteUser(@RequestParam(value = "id") UUID id,
+                                                  @RequestParam(value = "version") Long version) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            User userDetails = (User) authentication.getPrincipal();
+            String message = userService.deleteUser(id, userDetails, version);
+            if(StringUtils.isNotBlank(message)) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(new ResponseAPI(null, message, 400));
+            }
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseAPI(null, Constants.messageResponse.SUCCESS, 200));
+        } catch (Exception e) {
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ResponseAPI(null, Constants.messageResponse.ERROR + e.getMessage(), 500));
+        }
+    }
+
+    @PostMapping("/deleteMuti")
+    public ResponseAPI deleteMuti(@RequestBody List<DeleteMultiDTO> ids) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            User userDetails = (User) authentication.getPrincipal();
+            String message = userService.deleteMultiUser(ids, userDetails);
+            if(StringUtils.isNotBlank(message)) {
+                return new ResponseAPI(null, message, 400);
+            }
+            return new ResponseAPI(null, Constants.messageResponse.SUCCESS, 200);
+        } catch (Exception e) {
+            return new ResponseAPI(null, Constants.messageResponse.ERROR + e.getMessage(), 500);
+        }
+    }
+
+    @GetMapping("/lock")
+    public ResponseEntity<ResponseAPI> lock(
+            @RequestParam(value = "id") UUID id,
+            @RequestParam(value = "version") Long version) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            User userDetails = (User) authentication.getPrincipal();
+            String message = userService.lockUser(id,userDetails, version );
+            if(StringUtils.isNotBlank(message)) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(new ResponseAPI(null, message, 400));
+            }
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseAPI(null, Constants.messageResponse.SUCCESS, 200));
+        } catch (Exception e) {
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ResponseAPI(null, Constants.messageResponse.ERROR + e.getMessage(), 500));
+        }
+    }
+
+    private void deleteFile(String relativePath) throws IOException {
+        if (relativePath != null && !relativePath.isEmpty()) {
+            Path filePath = Paths.get(Constants.upload.IMAGE_DIRECTORY + relativePath);
+            if (Files.exists(filePath)) {
+                Files.delete(filePath);
+            }
+        }
+    }
+
+    @PostMapping(value = "/update", consumes = "multipart/form-data")
+    public ResponseAPI updateUser(
+            @RequestParam("userName") String username,
+            @RequestParam("fullName") String fullName,
+            @RequestParam(value = "phone", required = false) String phone,
+            @RequestParam(value = "email", required = false) String email,
+            @RequestParam("identifyCode") String identifyCode,
+            @RequestParam("userCode") String userCode,
+            @RequestParam("birthday") String birthDayStr,
+            @RequestParam(value = "gender", required = false) Integer gender,
+            @RequestParam("issueDate") String issueDateStr,
+            @RequestParam("issuePlace") String issuePlace,
+            @RequestParam(value = "profileImage", required = false) MultipartFile profileImage,
+            @RequestParam(value = "roleIds", required = false) List<UUID> roleIds) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User userDetails = (User) authentication.getPrincipal();
+
+        UserRequestDTO user = new UserRequestDTO();
+        user.setUsername(username);
+        user.setFullname(fullName);
+        user.setPhone(phone);
+        user.setEmail(email);
+        user.setIdentifyCode(identifyCode);
+        user.setUserCode(userCode);
+        try {
+            if (birthDayStr != null && !birthDayStr.trim().isEmpty()) {
+                Date birthDay = DateUtil.parseFlexibleDate2(birthDayStr);
+                user.setBirthDay(birthDay);
+            }
+        } catch (ParseException e) {
+            return new ResponseAPI(null, "error.DateParseError", 400);
+        }
+        user.setGender(gender);
+        try {
+            if (issueDateStr != null && !issueDateStr.trim().isEmpty()) {
+                Date issueDate = DateUtil.parseFlexibleDate2(issueDateStr);
+                user.setIssueDate(issueDate);
+            }
+        } catch (ParseException e) {
+            return new ResponseAPI(null, "error.DateParseError", 400);
+        }
+        user.setIssuePlace(issuePlace);
+        user.setProfileImage(profileImage);
+        try {
+            // Required field validation
+            if (isEmpty(user.getUsername()) || isEmpty(user.getFullname()) ||
+                    isEmpty(user.getUserCode())) {
+                return new ResponseAPI(null, "error.EnterrequiredInformation", 400);
+            }
+
+            // Validation for non-mandatory fields only if provided
+            if (!isEmpty(user.getEmail()) && !isValidEmail(user.getEmail())) {
+                return new ResponseAPI(null, "error.InvalidEmail", 400);
+            }
+            if (!isEmpty(user.getPhone()) && !isValidPhoneNumber(user.getPhone())) {
+                return new ResponseAPI(null, "error.InvalidPhoneNumber", 400);
+            }
+            if (!isEmpty(birthDayStr) && !isValidBirthday(user.getBirthDay())) {
+                return new ResponseAPI(null, "error.DateOfBirthCannotBeGreaterThanCurrentDate", 400);
+            }
+            if (!isEmpty(user.getIdentifyCode()) && !isValidIdentifyCode(user.getIdentifyCode())) {
+                return new ResponseAPI(null, "error.InvalidID", 400);
+            }
+            if (!user.getUsername().matches("[A-Za-z0-9_]+")) {
+                return new ResponseAPI(null, "error.LoginNameCannotContainSpecialCharacters", 400);
+            }
+            if (!user.getUserCode().matches("[A-Za-z0-9]+")) {
+                return new ResponseAPI(null, "error.EmployeeCodeCannotContainSpecialCharacters", 400);
+            }
+
+            // Get existing user data to retrieve old file paths
+            User existingUser = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new RuntimeException("error.UserDoesNotExist"));
+            String oldProfileImagePath = existingUser != null ? existingUser.getProfileImage() : null;
+
+            // Save files and get paths (only if files are provided)
+            String profileImagePath = null;
+            String signatureImagePath = null;
+            if (user.getProfileImage() != null && !user.getProfileImage().isEmpty()) {
+                // Delete old profile image if it exists
+                deleteFile(oldProfileImagePath);
+                profileImagePath = saveFile(user.getProfileImage(), "profile");
+            } else {
+                profileImagePath = oldProfileImagePath; // Retain old path if no new file
+            }
+
+            String message = userService.updateUser(user, profileImagePath, userDetails, roleIds);
+            if(StringUtils.isNotBlank(message)) {
+                return new ResponseAPI(null, message, 400);
+            }
+            return new ResponseAPI(null, Constants.messageResponse.SUCCESS, 200);
+        } catch (IOException e) {
+            return new ResponseAPI(null, "error.ErrorProcessingFile", 400);
+        } catch (RuntimeException e) {
+            return new ResponseAPI(null, e.getMessage(), 500);
+        }
+    }
+
+    @PostMapping(value = "/add", consumes = "multipart/form-data")
+    public ResponseAPI createUser(
+            @RequestParam("userName") String username,
+            @RequestParam("fullName") String fullname,
+            @RequestParam(value = "phone", required = false) String phone,
+            @RequestParam(value = "email", required = false) String email,
+            @RequestParam("identifyCode") String identifyCode,
+            @RequestParam("password") String password,
+            @RequestParam("userCode") String userCode,
+            @RequestParam("birthday") String birthDayStr,
+            @RequestParam(value = "gender", required = false) Integer gender,
+            @RequestParam("issueDate") String issueDateStr,
+            @RequestParam("issuePlace") String issuePlace,
+            @RequestParam(value = "profileImage", required = false) MultipartFile profileImage,
+            @RequestParam(value = "signatureImage", required = false) MultipartFile signatureImage,
+            @RequestParam(value = "roleIds", required = false) List<UUID> roleIds,
+            HttpServletRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User userDetails = (User) authentication.getPrincipal();
+        UserRequestDTO user = new UserRequestDTO();
+        user.setUsername(username);
+        user.setFullname(fullname);
+        user.setPhone(phone);
+        user.setEmail(email);
+        user.setIdentifyCode(identifyCode);
+        user.setPassword(password);
+        user.setUserCode(userCode);
+        try {
+            if (birthDayStr != null && !birthDayStr.trim().isEmpty()) {
+                Date birthDay = DateUtil.parseFlexibleDate2(birthDayStr);
+                user.setBirthDay(birthDay);
+            }
+        } catch (ParseException e) {
+            return new ResponseAPI(null, "error.DateParseError", 400);
+        }
+        user.setGender(gender);
+        try {
+            if (issueDateStr != null && !issueDateStr.trim().isEmpty()) {
+                Date issueDate = DateUtil.parseFlexibleDate2(issueDateStr);
+                user.setIssueDate(issueDate);
+            }
+        } catch (ParseException e) {
+            return new ResponseAPI(null, "error.DateParseError", 400);
+        }
+        user.setIssuePlace(issuePlace);
+        user.setProfileImage(profileImage);
+        try {
+            // Required field validation
+            if (isEmpty(user.getUsername()) || isEmpty(user.getFullname()) ||
+                    isEmpty(user.getUserCode())) {
+                return new ResponseAPI(null, "error.EnterrequiredInformation", 400);
+            }
+
+            // Validation for non-mandatory fields only if provided
+            if (!isEmpty(user.getEmail()) && !isValidEmail(user.getEmail())) {
+                return new ResponseAPI(null, "error.InvalidEmail", 400);
+            }
+            if (!isEmpty(user.getPhone()) && !isValidPhoneNumber(user.getPhone())) {
+                return new ResponseAPI(null, "error.InvalidPhoneNumber", 400);
+            }
+            if (!isEmpty(birthDayStr) && !isValidBirthday(user.getBirthDay())) {
+                return new ResponseAPI(null, "error.DateOfBirthCannotBeGreaterThanCurrentDate", 400);
+            }
+            if (!isEmpty(user.getIdentifyCode()) && !isValidIdentifyCode(user.getIdentifyCode())) {
+                return new ResponseAPI(null, "error.InvalidID", 400);
+            }
+            if (!user.getUsername().matches("[A-Za-z0-9_]+")) {
+                return new ResponseAPI(null, "error.LoginNameCannotContainSpecialCharacters", 400);
+            }
+            if (!user.getUserCode().matches("[A-Za-z0-9]+")) {
+                return new ResponseAPI(null, "error.EmployeeCodeCannotContainSpecialCharacters", 400);
+            }
+
+            // Save files and get paths (only if files are provided)
+            String profileImagePath = null;
+            String signatureImagePath = null;
+            if (user.getProfileImage() != null && !user.getProfileImage().isEmpty()) {
+                profileImagePath = saveFile(user.getProfileImage(), "profile");
+            }
+
+            String message = userService.createUser(user, profileImagePath, userDetails,roleIds);
+            if(StringUtils.isNotBlank(message)) {
+                return new ResponseAPI(null, message, 400);
+            }
+            return new ResponseAPI(null, Constants.messageResponse.SUCCESS, 200);
+        } catch (IOException e) {
+            return new ResponseAPI(null, "error.ErrorProcessingFile", 400);
+        } catch (RuntimeException e) {
+            return new ResponseAPI(null, e.getMessage(), 500);
+        }
+    }
+
+
+    @GetMapping("/getUserById")
+    public ResponseAPI getUserById(HttpServletRequest request) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+            if (authentication == null ||
+                    authentication instanceof AnonymousAuthenticationToken ||
+                    !authentication.isAuthenticated() ||
+                    authentication.getPrincipal() == null) {
+                return new ResponseAPI(null, "Không có token hoặc phiên đăng nhập hợp lệ", 401);
+            }
+
+            if (!(authentication.getPrincipal() instanceof User user)) {
+                return new ResponseAPI(null, "Thông tin người dùng không hợp lệ", 401);
+            }
+
+            UUID userId = user.getId();
+
+            UserResponse userDetail = userService.getByUserId(userId);
+            return new ResponseAPI(userDetail, Constants.messageResponse.SUCCESS, 200);
+        } catch (Exception e) {
+            return new ResponseAPI(null, "fail: " + e.getMessage(), 500);
+        }
+    }
+
+    @GetMapping("/getImage")
+    public ResponseEntity<?> getImageFile(
+            @RequestParam(value = "id", required = false) UUID id,
+            @RequestParam("type") String type) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+            if (authentication == null ||
+                    authentication instanceof AnonymousAuthenticationToken ||
+                    !authentication.isAuthenticated() ||
+                    authentication.getPrincipal() == null) {
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(new ResponseAPI(null, "Không có token hoặc phiên đăng nhập hợp lệ", 401));
+            }
+
+            if (!(authentication.getPrincipal() instanceof User)) {
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(new ResponseAPI(null, "Thông tin người dùng không hợp lệ", 401));
+            }
+
+            UserResponse user = userService.getByUserId(id);
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(new ResponseAPI(null, "Người dùng không tồn tại", 404));
+            }
+
+            Resource resource;
+            if ("profile".equals(type)) {
+                resource = userService.downFile(user.getProfileImage());
+            } else {
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(new ResponseAPI(null, "Loại hình ảnh không hợp lệ", 400));
+            }
+
+            if (resource != null && resource.exists() && resource.isReadable()) {
+                String filename = resource.getFilename();
+                MediaType mediaType = getMediaTypeFromFileName(filename);
+
+                return ResponseEntity.ok()
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + filename + "\"")
+                        .contentType(mediaType != null ? mediaType : MediaType.APPLICATION_OCTET_STREAM)
+                        .body(resource);
+            } else {
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(new ResponseAPI(null, "Hình ảnh không tồn tại", 404));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(new ResponseAPI(null, Constants.messageResponse.ERROR + e.getMessage(), 500));
+        }
+    }
+
+    @PostMapping(value = "/updateImage", consumes = "multipart/form-data")
+    public ResponseEntity<ResponseAPI> updateUserImage(
+            @RequestParam(value = "profileImage", required = false) MultipartFile profileImage,
+            @RequestParam(value = "signatureImage", required = false) MultipartFile signatureImage
+    ) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+            if (authentication == null ||
+                    authentication instanceof AnonymousAuthenticationToken ||
+                    !authentication.isAuthenticated() ||
+                    authentication.getPrincipal() == null) {
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(new ResponseAPI(null, "Không có token hoặc phiên đăng nhập hợp lệ", 401));
+            }
+
+            if (!(authentication.getPrincipal() instanceof User)) {
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(new ResponseAPI(null, "Thông tin người dùng không hợp lệ", 401));
+            }
+
+            User currentUser = (User) authentication.getPrincipal();
+
+            // Get existing user data to retrieve old file paths
+            User existingUser = userRepository.getUserByUserId(currentUser.getId());
+            String oldProfileImagePath = existingUser != null ? existingUser.getProfileImage() : null;
+
+            // Save files and get paths (only if files are provided)
+            String profileImagePath = null;
+            String signatureImagePath = null;
+            if (profileImage != null && !profileImage.isEmpty()) {
+                // Delete old profile image if it exists
+                deleteFile(oldProfileImagePath);
+                profileImagePath = saveFile(profileImage, "profile");
+            } else {
+                profileImagePath = oldProfileImagePath; // Retain old path if no new file
+            }
+
+            // Update user with new image paths
+            userService.updateUserImages( currentUser.getId(), profileImagePath, signatureImagePath);
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(new ResponseAPI(null, "Cập nhật thành công", 200));
+
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(new ResponseAPI(null, "Lỗi khi xử lý file: " + e.getMessage(), 400));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(new ResponseAPI(null, e.getMessage(), 400));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(new ResponseAPI(null, "Cập nhật thất bại: " + e.getMessage(), 500));
+        }
+    }
+
+    private MediaType getMediaTypeFromFileName(String fileName) {
+        String extension = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
+        switch (extension) {
+            case "jpg":
+            case "jpeg":
+                return MediaType.IMAGE_JPEG;
+            case "png":
+                return MediaType.IMAGE_PNG;
+            case "gif":
+                return MediaType.IMAGE_GIF;
+            case "bmp":
+                return MediaType.valueOf("image/bmp");
+            case "webp":
+                return MediaType.valueOf("image/webp");
+            default:
+                return null; // Trả về null nếu không xác định được, sẽ dùng fallback
+        }
+    }
+
+    private String saveFile(MultipartFile file, String type) throws IOException {
+        // Thư mục gốc
+        Path baseDir = Paths.get(Constants.upload.IMAGE_DIRECTORY,
+                type).normalize();
+
+        // Đảm bảo thư mục tồn tại
+        Files.createDirectories(baseDir);
+
+        // Sanitize filename
+        String originalName = Paths.get(file.getOriginalFilename())
+                .getFileName()
+                .toString()
+                .replaceAll("[\\\\/]", "_");
+        String safeFileName = System.currentTimeMillis() + "_" + originalName;
+
+        // Build file path an toàn
+        Path filePath = baseDir.resolve(safeFileName).normalize();
+
+        // Check path không thoát khỏi baseDir
+        if (!filePath.startsWith(baseDir)) {
+            throw new SecurityException("Invalid file path: " + filePath);
+        }
+
+        // Lưu file
+        Files.write(filePath, file.getBytes());
+
+        // Trả về relative path
+        return File.separator + type + File.separator + safeFileName;
+    }
+
+
+    private boolean isEmpty(String str) {
+        return str == null || str.trim().isEmpty();
+    }
+
+    private boolean isValidEmail(String email) {
+        String emailRegex = "^[A-Za-z0-9+_.-]+@(.+)$";
+        return email.matches(emailRegex);
+    }
+
+    private boolean isValidPhoneNumber(String phone) {
+        String phoneRegex = "^[0-9]{10}$";
+        return phone.matches(phoneRegex);
+    }
+
+    private boolean isValidBirthday(Date birthday) {
+        Date currentDate = new Date(); // Current date and time
+        return birthday != null && !birthday.after(currentDate);
+    }
+
+    private boolean isValidIdentifyCode(String identifyCode) {
+        String idRegex = "^[0-9]{9,12}$";
+        return identifyCode.matches(idRegex);
+    }
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ResponseAPI> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+        Throwable rootCause = getRootCause(ex);
+        String rootCauseMessage = rootCause.getMessage();
+        if (rootCauseMessage != null && rootCauseMessage.contains("value too long")) {
+            ResponseAPI errorResponse = new ResponseAPI(null, "Dữ liệu nhập vào quá dài, vui lòng kiểm tra lại.", 400);
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        }
+        ResponseAPI errorResponse = new ResponseAPI(null, "Lỗi toàn vẹn dữ liệu. Dữ liệu có thể bị trùng lặp hoặc không hợp lệ.", 400);
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    private Throwable getRootCause(Throwable throwable) {
+        Throwable cause = throwable.getCause();
+        while (cause != null && cause.getCause() != null) {
+            cause = cause.getCause();
+        }
+        return cause == null ? throwable : cause;
+    }
+
+    @GetMapping("/getAllUser")
+    public ResponseAPI getAllUser() {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            User userDetails = (User) authentication.getPrincipal();
+            List<User> listAllUser = userService.getAllUser();
+            return new ResponseAPI(listAllUser, Constants.messageResponse.SUCCESS, 200);
+        } catch (Exception e) {
+            return new ResponseAPI(null, Constants.messageResponse.ERROR + e.getMessage(), 500);
+        }
+    }
+    @PostMapping("/checkDeleteMulti")
+    public ResponseAPI checkDeleteMulti(@RequestBody List<DeleteMultiDTO> ids) {
+        try {
+            ErrorListResponse message = userService.checkDeleteMulti(ids);
+            return new ResponseAPI(message, Constants.messageResponse.SUCCESS, 200);
+        } catch (Exception e) {
+            return new ResponseAPI(null, Constants.messageResponse.ERROR + e.getMessage(), 500);
+        }
+    }
+
+
+}

@@ -3,6 +3,7 @@ import { Spin, notification } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getUserPermissions } from '../api/roleApi';
+import { PATH_HOME } from '../constants';
 
 interface Permission {
   permissionCode: string;
@@ -33,7 +34,7 @@ export const MenuGuard: React.FC<MenuGuardProps> = ({ menuCode, children }) => {
             description: t('error.NoPermission'),
             duration: 5,
           });
-          navigate('/home', { replace: true });
+          navigate(PATH_HOME.root, { replace: true });
         }
         return;
       }
@@ -53,11 +54,11 @@ export const MenuGuard: React.FC<MenuGuardProps> = ({ menuCode, children }) => {
           description: t('error.NoPermission'),
           duration: 5,
         });
-        navigate('/home', { replace: true });
+        navigate(PATH_HOME.root, { replace: true });
       }
     } catch (err) {
       setHasAccess(false);
-      navigate('/home', { replace: true });
+      navigate(PATH_HOME.root, { replace: true });
     }
   }, [menuCode, navigate, location.pathname, t]);
 

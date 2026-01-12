@@ -26,6 +26,8 @@ import { PATH_SYSTEM } from '../constants';
 import ProtectedRoute from './ProtectedRoute';
 import { PasswordResetResultPage } from '../pages/admin/authentication/ForgotPasswordModal';
 import { DashboardLayout } from '../pages/admin/dashboards';
+import Login from '../pages/client/Login';
+import Home from '../pages/client/Home';
 
 // Custom scroll restoration function
 
@@ -125,28 +127,18 @@ const PageWrapper = ({ children }: PageProps) => {
 const router = createBrowserRouter([
   {
     path: '/',
+    // Redirect to /client/login by default
+    element: <Login />,
     errorElement: <ErrorPage />,
-    children: [
-      {
-        index: true,
-        path: '',
-        element: <SignInPage />,
-      },
-    ],
+    children: [],
   },
   {
-    path: '/home',
+    path: '/admin/system',
     element: <PageWrapper children={<DashboardLayout />} />,
-    children: [
-      {
-        index: true,
-        path: '',
-        element: <DashboardLayout />,
-      },
-    ],
+    children: [],
   },
   {
-    path: '/system',
+    path: '/admin/system',
     element: <PageWrapper children={<DashboardLayout />} />,
     errorElement: <ErrorPage />,
     children: [
@@ -174,13 +166,13 @@ const router = createBrowserRouter([
     ],
   },
   {
-    path: '/auth',
+    path: '/admin/auth',
     errorElement: <ErrorPage />,
     children: [
-      {
-        path: 'signup',
-        element: <SignUpPage />,
-      },
+      // {
+      //   path: 'signup',
+      //   element: <SignUpPage />,
+      // },
       {
         path: 'signin',
         element: <SignInPage />,
@@ -218,6 +210,30 @@ const router = createBrowserRouter([
       {
         path: '503',
         element: <Error503Page />,
+      },
+    ],
+  },
+  {
+    path: '/admin',
+    element: <DashboardLayout />,
+    children: [
+      {
+        index: true,
+        path: '',
+        element: <DashboardLayout />,
+      },
+    ],
+  },
+  {
+    path: '/client',
+    children: [
+      {
+        path: 'login',
+        element: <Login />,
+      },
+      {
+        path: 'home',
+        element: <Home />,
       },
     ],
   },
